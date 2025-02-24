@@ -6,7 +6,10 @@ let storySoFarEl_placeholder, storySoFarEl, storyOverviewEl, whatHappensNextEl,
 
 // UI initialization
 document.addEventListener('DOMContentLoaded', () => {
-    initializeElements();
+    if (!initializeElements()) {
+        console.error("Failed to initialize all required elements");
+        return;
+    }
     initializeUI();
     loadSavedState();
 });
@@ -14,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeElements() {
     // Get DOM elements
     storySoFarEl_placeholder = document.getElementById('storySoFarEl_placeholder');
+    storySoFarEl = document.getElementById('storySoFarEl');
     storyOverviewEl = document.getElementById('storyOverviewEl');
     whatHappensNextEl = document.getElementById('whatHappensNextEl');
     deleteWhatHappensNextBtn = document.getElementById('deleteWhatHappensNextBtn');
@@ -30,20 +34,28 @@ function initializeElements() {
     infoTrackingCtn = document.getElementById('infoTrackingCtn');
     currentTrackedInfoEl = document.getElementById('currentTrackedInfoEl');
 
-    // Log any missing elements
-    const elements = {
-        storySoFarEl_placeholder, storyOverviewEl, whatHappensNextEl,
-        deleteWhatHappensNextBtn, storyBeginBtn, generateBtn, stopBtn,
-        storySoFarDeleteBtn, updateTrackedInfoUndoBtn, bottomButtonsCtn,
-        subtitleEl, loadGameBtn, storyGenerationAreaEl, infoTrackingBtn,
-        infoTrackingCtn, currentTrackedInfoEl
+    // Check required elements
+    const requiredElements = {
+        storySoFarEl,
+        storyOverviewEl,
+        whatHappensNextEl,
+        deleteWhatHappensNextBtn,
+        storyBeginBtn,
+        generateBtn,
+        stopBtn,
+        subtitleEl,
+        storyGenerationAreaEl
     };
 
-    Object.entries(elements).forEach(([name, element]) => {
+    let missingElements = [];
+    Object.entries(requiredElements).forEach(([name, element]) => {
         if (!element) {
-            console.warn(`Missing element: ${name}`);
+            console.error(`Missing required element: ${name}`);
+            missingElements.push(name);
         }
     });
+
+    return missingElements.length === 0;
 }
 
 function initializeUI() {
@@ -214,15 +226,34 @@ function toggleInfoTracking() {
 }
 
 function loadSavedState() {
-    // Load saved values from localStorage
-    if(localStorage.storyOverview) storyOverviewEl.value = localStorage.storyOverview;
-    if(localStorage.whatHappensNext) whatHappensNextEl.value = localStorage.whatHappensNext;
-    if(localStorage.storySoFar) storySoFarEl.value = localStorage.storySoFar;
-    
-    // Update UI based on saved state
-    deleteWhatHappensNextBtn.hidden = !whatHappensNextEl.value.trim();
-    if(localStorage.generateCount && Number(localStorage.generateCount) > 5) {
-        subtitleEl.style.display = "none";
+    try {
+        // Only set values if both the element and localStorage value exist
+        if (storyOverviewEl && localStorage.storyOverview) {
+            storyOverviewEl.value = localStorage.storyOverview;
+        }
+
+        if (whatHappensNextEl && localStorage.whatHappensNext) {
+            whatHappensNextEl.value = localStorage.whatHappensNext;
+        }
+
+        if (storySoFarEl && localStorage.storySoFar) {
+            storySoFarEl.value = localStorage.storySoFar;
+        }
+
+        // Update button visibility
+        if (deleteWhatHappensNextBtn && whatHappensNextEl) {
+            deleteWhatHappensNextBtn.hidden = !whatHappensNextEl.value.trim();
+        }
+
+        // Update subtitle visibility
+        if (subtitleEl && localStorage.generateCount) {
+            const count = Number(localStorage.generateCount);
+            if (!isNaN(count) && count > 5) {
+                subtitleEl.style.display = "none";
+            }
+        }
+    } catch (error) {
+        console.error('Error loading saved state:', error);
     }
 }
 
