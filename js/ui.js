@@ -174,11 +174,36 @@ function toggleInfoTracking() {
 }
 
 function updateButtonsDisplay() {
-    if(storySoFarEl.value.trim() === "") {
-        bottomButtonsCtn.style.display = "none";
-    } else {
-        bottomButtonsCtn.style.display = "flex";
-        generateBtn.textContent = "▶️ continue";
+    // Get all required elements
+    const storyOverviewEl = document.getElementById('storyOverviewEl');
+    const storyGenerationAreaEl = document.getElementById('storyGenerationAreaEl');
+    const whatHappensNextEl = document.getElementById('whatHappensNextEl');
+    const storyBeginBtn = document.getElementById('storyBeginBtn');
+    const loadGameBtn = document.getElementById('loadGameBtn');
+    const deleteWhatHappensNextBtn = document.getElementById('deleteWhatHappensNextBtn');
+
+    // Only proceed if we have the overview element
+    if (storyOverviewEl) {
+        const hasOverview = storyOverviewEl.value.trim().length > 0;
+        
+        // Show/hide begin and load buttons
+        if (storyBeginBtn) {
+            storyBeginBtn.style.display = hasOverview ? '' : 'none';
+        }
+        if (loadGameBtn) {
+            loadGameBtn.style.display = hasOverview ? '' : 'none';
+        }
+        
+        // Show/hide generation area
+        if (storyGenerationAreaEl) {
+            storyGenerationAreaEl.hidden = !hasOverview;
+        }
+    }
+
+    // Show/hide delete button based on input
+    if (whatHappensNextEl && deleteWhatHappensNextBtn) {
+        const hasInput = whatHappensNextEl.value.trim().length > 0;
+        deleteWhatHappensNextBtn.style.display = hasInput ? '' : 'none';
     }
 }
 

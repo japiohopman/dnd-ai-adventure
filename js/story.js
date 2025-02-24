@@ -11,6 +11,15 @@ function updateStory(text) {
     }
 }
 
+// Update story display
+function updateStory(text) {
+    const storySoFarEl = document.getElementById('storySoFarEl');
+    if (storySoFarEl) {
+        storySoFarEl.textContent += text;
+        storySoFarEl.scrollTop = storySoFarEl.scrollHeight;
+    }
+}
+
 // Start the game with initial context
 function startGame(initialContext = '') {
     currentStory = initialContext;

@@ -58,31 +58,34 @@ function loadSavedSettings() {
 }
 
 function initializeWritingStyleSettings() {
-    const responseStyleEl = document.getElementById('responseStyleEl');
-    const customResponseStyleCtn = document.getElementById('customResponseStyleCtn');
-    const responseStyleCustomInputEl = document.getElementById('responseStyleCustomInputEl');
-    const storyWritingStyleCustomInputEl = document.getElementById('storyWritingStyleCustomInputEl');
+    // Get all required elements
+    const elements = {
+        responseStyleEl: document.getElementById('responseStyleEl'),
+        customResponseStyleCtn: document.getElementById('customResponseStyleCtn'),
+        responseStyleCustomInputEl: document.getElementById('responseStyleCustomInputEl'),
+        storyWritingStyleCustomInputEl: document.getElementById('storyWritingStyleCustomInputEl')
+    };
 
-    if (responseStyleEl) {
-        // Writing style change handler
-        responseStyleEl.addEventListener('change', () => {
-            localStorage.responseStyle = responseStyleEl.value;
-            if (customResponseStyleCtn) {
-                customResponseStyleCtn.hidden = (responseStyleEl.value !== '@@@custom');
+    // Writing style change handler
+    if (elements.responseStyleEl) {
+        elements.responseStyleEl.addEventListener('change', () => {
+            localStorage.responseStyle = elements.responseStyleEl.value;
+            if (elements.customResponseStyleCtn) {
+                elements.customResponseStyleCtn.hidden = (elements.responseStyleEl.value !== '@@@custom');
             }
         });
     }
 
     // Custom writing style input handlers
-    if (responseStyleCustomInputEl) {
-        responseStyleCustomInputEl.addEventListener('input', () => {
-            localStorage.responseStyleCustomInput = responseStyleCustomInputEl.value;
+    if (elements.responseStyleCustomInputEl) {
+        elements.responseStyleCustomInputEl.addEventListener('input', () => {
+            localStorage.responseStyleCustomInput = elements.responseStyleCustomInputEl.value;
         });
     }
 
-    if (storyWritingStyleCustomInputEl) {
-        storyWritingStyleCustomInputEl.addEventListener('input', () => {
-            localStorage.storyWritingStyleCustomInput = storyWritingStyleCustomInputEl.value;
+    if (elements.storyWritingStyleCustomInputEl) {
+        elements.storyWritingStyleCustomInputEl.addEventListener('input', () => {
+            localStorage.storyWritingStyleCustomInput = elements.storyWritingStyleCustomInputEl.value;
         });
     }
 }
