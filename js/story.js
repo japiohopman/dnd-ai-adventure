@@ -2,53 +2,60 @@
 let currentStory = '';
 let isGenerating = false;
 
+// Update story display
+function updateStory(text) {
+    const storySoFarEl = document.getElementById('storySoFarEl');
+    if (storySoFarEl) {
+        storySoFarEl.textContent += text;
+        storySoFarEl.scrollTop = storySoFarEl.scrollHeight;
+    }
+}
+
 // Start the game with initial context
 function startGame(initialContext = '') {
     currentStory = initialContext;
+    const storyGenerationAreaEl = document.getElementById('storyGenerationAreaEl');
+    if (storyGenerationAreaEl) {
+        storyGenerationAreaEl.hidden = false;
+    }
     updateStory('Welcome to your D&D adventure! ' + initialContext);
 }
 
 // Generate story response based on player action
-async function generateStoryResponse(action) {
+async function continueStory(action) {
     if (isGenerating) return;
     isGenerating = true;
 
     try {
         // Update UI to show we're generating
         updateStory(`\n> ${action}\n`);
-        generateBtn.textContent = '⌛ generating...';
+        const generateBtn = document.getElementById('generateBtn');
+        if (generateBtn) {
+            generateBtn.textContent = '⌛ generating...';
+        }
 
         // Generate response using AI and Perchance
         const prompt = `${currentStory}\n\nPlayer: ${action}\n\nNarrator:`;
-        const enhancedResponse = await generateStoryResponse(prompt);
+        const response = await window.ai.generate(prompt);
+        const enhancedResponse = await window.perchancePlugin.enhanceStoryText(response);
 
         // Update story with AI and Perchance response
         currentStory += `\n${action}\n${enhancedResponse}`;
         updateStory(enhancedResponse);
 
         // Reset UI
-        clearInputs();
+        const whatHappensNextEl = document.getElementById('whatHappensNextEl');
+        if (whatHappensNextEl) {
+            whatHappensNextEl.value = '';
+        }
+        if (generateBtn) {
+            generateBtn.textContent = '▶️ continue';
+        }
     } catch (error) {
         console.error('Error generating story:', error);
         updateStory('\nError generating response. Please try again.\n');
     } finally {
         isGenerating = false;
-        generateBtn.textContent = '▶️ continue';
-    }
-}
-
-async function generateStoryResponse(prompt) {
-    try {
-        // First get the AI-generated response
-        const response = await window.ai.generate(prompt);
-        
-        // Then enhance it with Perchance-generated elements
-        const enhancedResponse = await window.perchancePlugin.enhanceStoryText(response);
-        
-        return enhancedResponse;
-    } catch (error) {
-        console.error('Error generating story response:', error);
-        return 'Error generating story. Please try again.';
     }
 }
 
@@ -86,15 +93,32 @@ const generationEventHandlers = {
     onStart(data) {
         window.gotFirstChunk = false;
         window.withheldTrailingNewlines = "";
-        generateBtn.disabled = true;
-        regenLastBtn.disabled = true;
-        deleteLastBtn.disabled = true;
-        generateBtn.textContent = "⌛ loading...";
-        stopBtn.style.display = "block";
-        if(storySoFarEl.value.trim() && window.continueMode !== "inline") {
+        const generateBtn = document.getElementById('generateBtn');
+        if (generateBtn) {
+            generateBtn.disabled = true;
+        }
+        const regenLastBtn = document.getElementById('regenLastBtn');
+        if (regenLastBtn) {
+            regenLastBtn.disabled = true;
+        }
+        const deleteLastBtn = document.getElementById('deleteLastBtn');
+        if (deleteLastBtn) {
+            deleteLastBtn.disabled = true;
+        }
+        if (generateBtn) {
+            generateBtn.textContent = "⌛ loading...";
+        }
+        const stopBtn = document.getElementById('stopBtn');
+        if (stopBtn) {
+            stopBtn.style.display = "block";
+        }
+        const storySoFarEl = document.getElementById('storySoFarEl');
+        if (storySoFarEl && storySoFarEl.value.trim() && window.continueMode !== "inline") {
             storySoFarEl.value += "\n";
         }
-        storySoFarEl.scrollTop = 99999999;
+        if (storySoFarEl) {
+            storySoFarEl.scrollTop = 99999999;
+        }
     },
 
     onChunk(data) {
@@ -102,38 +126,65 @@ const generationEventHandlers = {
         
         // First chunk handling
         if(!window.gotFirstChunk) {
-            if(storySoFarEl.value.trim() && window.continueMode !== "inline") {
+            const storySoFarEl = document.getElementById('storySoFarEl');
+            if (storySoFarEl && storySoFarEl.value.trim() && window.continueMode !== "inline") {
                 textChunk = "\n" + textChunk.replace(/^\s*\n+/g, "");
             }
             window.gotFirstChunk = true;
         }
         
         if(textChunk.length > 0) {
-            storySoFarEl.value += textChunk;
+            const storySoFarEl = document.getElementById('storySoFarEl');
+            if (storySoFarEl) {
+                storySoFarEl.value += textChunk;
+            }
         }
         
         // Clean up any unwanted text
-        if(storySoFarEl.value.endsWith("\n# Player")) {
+        const storySoFarEl = document.getElementById('storySoFarEl');
+        if (storySoFarEl && storySoFarEl.value.endsWith("\n# Player")) {
             storySoFarEl.value = storySoFarEl.value.replace(/\n# Player$/g, "");
         }
         
-        storySoFarEl.scrollTop = 99999999;
+        if (storySoFarEl) {
+            storySoFarEl.scrollTop = 99999999;
+        }
     },
 
     onFinish(data) {
-        generateBtn.disabled = false;
-        regenLastBtn.disabled = false;
-        deleteLastBtn.disabled = false;
-        generateBtn.textContent = "▶️ continue";
-        stopBtn.style.display = "none";
+        const generateBtn = document.getElementById('generateBtn');
+        if (generateBtn) {
+            generateBtn.disabled = false;
+        }
+        const regenLastBtn = document.getElementById('regenLastBtn');
+        if (regenLastBtn) {
+            regenLastBtn.disabled = false;
+        }
+        const deleteLastBtn = document.getElementById('deleteLastBtn');
+        if (deleteLastBtn) {
+            deleteLastBtn.disabled = false;
+        }
+        if (generateBtn) {
+            generateBtn.textContent = "▶️ continue";
+        }
+        const stopBtn = document.getElementById('stopBtn');
+        if (stopBtn) {
+            stopBtn.style.display = "none";
+        }
         
         if(window.withheldTrailingNewlines) {
-            storySoFarEl.value += window.withheldTrailingNewlines;
+            const storySoFarEl = document.getElementById('storySoFarEl');
+            if (storySoFarEl) {
+                storySoFarEl.value += window.withheldTrailingNewlines;
+            }
             window.withheldTrailingNewlines = "";
         }
         
         // Save story
-        localStorage.storySoFar = storySoFarEl.value;
+        const storySoFarEl = document.getElementById('storySoFarEl');
+        if (storySoFarEl) {
+            localStorage.storySoFar = storySoFarEl.value;
+        }
         
         // Enable rating buttons
         if(typeof window.enableRatingButtons === 'function') {
@@ -144,8 +195,10 @@ const generationEventHandlers = {
 
 // Continue the story based on user input
 async function continueStory(opts = {}) {
-    const storyText = storySoFarEl.value.trim();
-    const whatHappensNext = whatHappensNextEl.value.trim();
+    const storySoFarEl = document.getElementById('storySoFarEl');
+    const whatHappensNextEl = document.getElementById('whatHappensNextEl');
+    const storyText = storySoFarEl ? storySoFarEl.value.trim() : '';
+    const whatHappensNext = whatHappensNextEl ? whatHappensNextEl.value.trim() : '';
     
     if(!storyText && !whatHappensNext) {
         alert("Please enter some text to begin the story.");
@@ -166,17 +219,33 @@ async function continueStory(opts = {}) {
 
 // Disable UI elements during story generation
 function disableUIForGeneration() {
-    generateBtn.disabled = true;
-    regenLastBtn.disabled = true;
-    deleteLastBtn.disabled = true;
-    whatHappensNextEl.disabled = true;
+    const generateBtn = document.getElementById('generateBtn');
+    if (generateBtn) {
+        generateBtn.disabled = true;
+    }
+    const regenLastBtn = document.getElementById('regenLastBtn');
+    if (regenLastBtn) {
+        regenLastBtn.disabled = true;
+    }
+    const deleteLastBtn = document.getElementById('deleteLastBtn');
+    if (deleteLastBtn) {
+        deleteLastBtn.disabled = true;
+    }
+    const whatHappensNextEl = document.getElementById('whatHappensNextEl');
+    if (whatHappensNextEl) {
+        whatHappensNextEl.disabled = true;
+    }
 }
 
 // Format story text for AI processing
 function formatStoryText() {
-    return storySoFarEl.value.trim()
-        .replace(/\n{3,}/g, "\n\n")
-        .replace(/\s+$/, "");
+    const storySoFarEl = document.getElementById('storySoFarEl');
+    if (storySoFarEl) {
+        return storySoFarEl.value.trim()
+            .replace(/\n{3,}/g, "\n\n")
+            .replace(/\s+$/, "");
+    }
+    return '';
 }
 
 // Generate story continuation using AI
@@ -195,7 +264,10 @@ async function generateStoryContinuation(opts) {
     // Generate with AI
     try {
         await generateWithAI(prompt, opts);
-        whatHappensNextEl.value = "";
+        const whatHappensNextEl = document.getElementById('whatHappensNextEl');
+        if (whatHappensNextEl) {
+            whatHappensNextEl.value = "";
+        }
     } catch(error) {
         console.error('Error in story continuation:', error);
         throw error;

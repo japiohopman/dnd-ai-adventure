@@ -16,54 +16,84 @@ function initializeSettings() {
 }
 
 function loadSavedSettings() {
+    const responseStyleEl = document.getElementById('responseStyleEl');
+    const customResponseStyleCtn = document.getElementById('customResponseStyleCtn');
+    const difficultyModeEl = document.getElementById('difficultyModeEl');
+    const infoTrackingBtn = document.getElementById('infoTrackingBtn');
+    const currentTrackedInfoEl = document.getElementById('currentTrackedInfoEl');
+    const responseStyleCustomInputEl = document.getElementById('responseStyleCustomInputEl');
+    const storyWritingStyleCustomInputEl = document.getElementById('storyWritingStyleCustomInputEl');
+
     // Load writing style
-    if(localStorage.responseStyle) {
+    if (localStorage.responseStyle && responseStyleEl) {
         responseStyleEl.value = localStorage.responseStyle;
-        customResponseStyleCtn.hidden = (responseStyleEl.value !== '@@@custom');
+        if (customResponseStyleCtn) {
+            customResponseStyleCtn.hidden = (responseStyleEl.value !== '@@@custom');
+        }
     }
     if(localStorage.responseStyleCustomInput) {
-        responseStyleCustomInputEl.value = localStorage.responseStyleCustomInput;
+        if (responseStyleCustomInputEl) {
+            responseStyleCustomInputEl.value = localStorage.responseStyleCustomInput;
+        }
     }
     if(localStorage.storyWritingStyleCustomInput) {
-        storyWritingStyleCustomInputEl.value = localStorage.storyWritingStyleCustomInput;
+        if (storyWritingStyleCustomInputEl) {
+            storyWritingStyleCustomInputEl.value = localStorage.storyWritingStyleCustomInput;
+        }
     }
 
     // Load difficulty mode
-    if(localStorage.difficultyMode) {
+    if (localStorage.difficultyMode && difficultyModeEl) {
         difficultyModeEl.value = localStorage.difficultyMode;
     }
 
     // Load info tracking state
-    if(localStorage.infoTrackingEnabled) {
+    if (localStorage.infoTrackingEnabled && infoTrackingBtn) {
         infoTrackingBtn.dataset.enabled = localStorage.infoTrackingEnabled;
         updateInfoTrackingDisplay();
     }
-    if(localStorage.currentTrackedInfo) {
+    if (localStorage.currentTrackedInfo && currentTrackedInfoEl) {
         currentTrackedInfoEl.value = localStorage.currentTrackedInfo;
     }
 }
 
 function initializeWritingStyleSettings() {
-    // Writing style change handler
-    responseStyleEl.addEventListener('change', () => {
-        localStorage.responseStyle = responseStyleEl.value;
-        customResponseStyleCtn.hidden = (responseStyleEl.value !== '@@@custom');
-    });
+    const responseStyleEl = document.getElementById('responseStyleEl');
+    const customResponseStyleCtn = document.getElementById('customResponseStyleCtn');
+    const responseStyleCustomInputEl = document.getElementById('responseStyleCustomInputEl');
+    const storyWritingStyleCustomInputEl = document.getElementById('storyWritingStyleCustomInputEl');
+
+    if (responseStyleEl) {
+        // Writing style change handler
+        responseStyleEl.addEventListener('change', () => {
+            localStorage.responseStyle = responseStyleEl.value;
+            if (customResponseStyleCtn) {
+                customResponseStyleCtn.hidden = (responseStyleEl.value !== '@@@custom');
+            }
+        });
+    }
 
     // Custom writing style input handlers
-    responseStyleCustomInputEl.addEventListener('input', () => {
-        localStorage.responseStyleCustomInput = responseStyleCustomInputEl.value;
-    });
+    if (responseStyleCustomInputEl) {
+        responseStyleCustomInputEl.addEventListener('input', () => {
+            localStorage.responseStyleCustomInput = responseStyleCustomInputEl.value;
+        });
+    }
 
-    storyWritingStyleCustomInputEl.addEventListener('input', () => {
-        localStorage.storyWritingStyleCustomInput = storyWritingStyleCustomInputEl.value;
-    });
+    if (storyWritingStyleCustomInputEl) {
+        storyWritingStyleCustomInputEl.addEventListener('input', () => {
+            localStorage.storyWritingStyleCustomInput = storyWritingStyleCustomInputEl.value;
+        });
+    }
 }
 
 function initializeDifficultySettings() {
-    difficultyModeEl.addEventListener('change', () => {
-        localStorage.difficultyMode = difficultyModeEl.value;
-    });
+    const difficultyModeEl = document.getElementById('difficultyModeEl');
+    if (difficultyModeEl) {
+        difficultyModeEl.addEventListener('change', () => {
+            localStorage.difficultyMode = difficultyModeEl.value;
+        });
+    }
 }
 
 function initializeColorSchemeSettings() {
@@ -85,15 +115,31 @@ function initializeColorSchemeSettings() {
 
 // Rating system
 function resetRatingButtons() {
-    rateLastMessageBadBtn.disabled = true;
-    rateLastMessageGoodBtn.disabled = true;
-    rateLastMessageBadBtn.style.opacity = 1;
-    rateLastMessageGoodBtn.style.opacity = 1;
+    const rateLastMessageBadBtn = document.getElementById('rateLastMessageBadBtn');
+    const rateLastMessageGoodBtn = document.getElementById('rateLastMessageGoodBtn');
+    if (rateLastMessageBadBtn) {
+        rateLastMessageBadBtn.disabled = true;
+    }
+    if (rateLastMessageGoodBtn) {
+        rateLastMessageGoodBtn.disabled = true;
+    }
+    if (rateLastMessageBadBtn) {
+        rateLastMessageBadBtn.style.opacity = 1;
+    }
+    if (rateLastMessageGoodBtn) {
+        rateLastMessageGoodBtn.style.opacity = 1;
+    }
 }
 
 function enableRatingButtons() {
-    rateLastMessageBadBtn.disabled = false;
-    rateLastMessageGoodBtn.disabled = false;
+    const rateLastMessageBadBtn = document.getElementById('rateLastMessageBadBtn');
+    const rateLastMessageGoodBtn = document.getElementById('rateLastMessageGoodBtn');
+    if (rateLastMessageBadBtn) {
+        rateLastMessageBadBtn.disabled = false;
+    }
+    if (rateLastMessageGoodBtn) {
+        rateLastMessageGoodBtn.disabled = false;
+    }
 }
 
 async function rateLastMessage(rating) {
@@ -107,13 +153,23 @@ async function rateLastMessage(rating) {
 
     // Update UI
     const score = rating === "good" ? 1 : 0;
-    rateLastMessageBadBtn.disabled = true;
-    rateLastMessageGoodBtn.disabled = true;
+    const rateLastMessageBadBtn = document.getElementById('rateLastMessageBadBtn');
+    const rateLastMessageGoodBtn = document.getElementById('rateLastMessageGoodBtn');
+    if (rateLastMessageBadBtn) {
+        rateLastMessageBadBtn.disabled = true;
+    }
+    if (rateLastMessageGoodBtn) {
+        rateLastMessageGoodBtn.disabled = true;
+    }
     
     if(rating === "good") {
-        rateLastMessageBadBtn.style.opacity = 0.2;
+        if (rateLastMessageBadBtn) {
+            rateLastMessageBadBtn.style.opacity = 0.2;
+        }
     } else {
-        rateLastMessageGoodBtn.style.opacity = 0.2;
+        if (rateLastMessageGoodBtn) {
+            rateLastMessageGoodBtn.style.opacity = 0.2;
+        }
     }
 
     // Handle recent rating reasons
@@ -121,16 +177,27 @@ async function rateLastMessage(rating) {
     let reasonCountEntries = Object.entries(window.recentRatingReasonCounts).sort((a,b) => b[1]-a[1]);
     if(reasonCountEntries.length > 10) reasonCountEntries = reasonCountEntries.slice(0, 10);
     window.recentRatingReasonCounts = Object.fromEntries(reasonCountEntries);
-    recentRatingReasonsDataList.innerHTML = reasonCountEntries
-        .map(e => `<option value="${e[0].replace(/</g, "&lt;").replace(/"/g, "&quot;")}"></option>`)
-        .join("");
+    const recentRatingReasonsDataList = document.getElementById('recentRatingReasonsDataList');
+    if (recentRatingReasonsDataList) {
+        recentRatingReasonsDataList.innerHTML = reasonCountEntries
+            .map(e => `<option value="${e[0].replace(/</g, "&lt;").replace(/"/g, "&quot;")}"></option>`)
+            .join("");
+    }
 
     // Get rating reason
     let reasonResolver;
     const reasonFinishPromise = new Promise(r => reasonResolver = r);
-    ratingReasonEl.value = "";
-    ratingReasonCtn.style.display = "";
-    ratingReasonEl.focus();
+    const ratingReasonEl = document.getElementById('ratingReasonEl');
+    const ratingReasonCtn = document.getElementById('ratingReasonCtn');
+    if (ratingReasonEl) {
+        ratingReasonEl.value = "";
+    }
+    if (ratingReasonCtn) {
+        ratingReasonCtn.style.display = "";
+    }
+    if (ratingReasonEl) {
+        ratingReasonEl.focus();
+    }
     await new Promise(r => setTimeout(r, 100));
 
     // Handle clicks outside reason input
@@ -147,7 +214,9 @@ async function rateLastMessage(rating) {
             reasonResolver(ratingReasonEl.value);
         }
     }
-    ratingReasonEl.addEventListener("keydown", enterKeydownHandler);
+    if (ratingReasonEl) {
+        ratingReasonEl.addEventListener("keydown", enterKeydownHandler);
+    }
 
     // Wait for reason input
     const reason = await reasonFinishPromise;
@@ -156,9 +225,13 @@ async function rateLastMessage(rating) {
     }
 
     // Clean up
-    ratingReasonCtn.style.display = 'none';
+    if (ratingReasonCtn) {
+        ratingReasonCtn.style.display = 'none';
+    }
     window.removeEventListener("click", windowClickHandler);
-    ratingReasonEl.removeEventListener("keydown", enterKeydownHandler);
+    if (ratingReasonEl) {
+        ratingReasonEl.removeEventListener("keydown", enterKeydownHandler);
+    }
 
     // Submit rating
     window.lastGenerationStreamObj.submitUserRating({score, reason});

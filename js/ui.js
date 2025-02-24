@@ -29,6 +29,18 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeUI() {
+    const buttons = {
+        storyBeginBtn: document.getElementById('storyBeginBtn'),
+        loadGameBtn: document.getElementById('loadGameBtn'),
+        generateBtn: document.getElementById('generateBtn'),
+        stopBtn: document.getElementById('stopBtn')
+    };
+
+    const inputs = {
+        whatHappensNextEl: document.getElementById('whatHappensNextEl'),
+        storyOverviewEl: document.getElementById('storyOverviewEl')
+    };
+
     // Initialize story text area
     if (!window.storySoFarEl) {
         window.storySoFarEl = createTextEditor({
@@ -48,6 +60,43 @@ function initializeUI() {
         storySoFarEl_placeholder.replaceWith(storySoFarEl);
         storySoFarEl.style.cssText = `display:block; padding-bottom:1.5rem; width:100%; max-width:98vw; min-height:400px; max-height:80vh; height:${window.innerHeight*0.3}px;`;
         storySoFarEl.placeholder = 'The story will appear here when you click the generate button below. You can edit it as needed.';
+    }
+
+    // Add event listeners
+    if (buttons.storyBeginBtn) {
+        buttons.storyBeginBtn.addEventListener('click', () => {
+            const overview = inputs.storyOverviewEl ? inputs.storyOverviewEl.value.trim() : '';
+            startGame(overview);
+        });
+    }
+
+    if (buttons.loadGameBtn) {
+        buttons.loadGameBtn.addEventListener('click', loadGame);
+    }
+
+    if (buttons.generateBtn) {
+        buttons.generateBtn.addEventListener('click', () => {
+            const action = inputs.whatHappensNextEl ? inputs.whatHappensNextEl.value.trim() : '';
+            if (action) {
+                continueStory(action);
+            }
+        });
+    }
+
+    if (buttons.stopBtn) {
+        buttons.stopBtn.addEventListener('click', stopGeneration);
+    }
+
+    if (inputs.whatHappensNextEl) {
+        inputs.whatHappensNextEl.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                const action = inputs.whatHappensNextEl.value.trim();
+                if (action) {
+                    continueStory(action);
+                }
+            }
+        });
     }
 
     // Initialize event listeners
@@ -80,18 +129,6 @@ function initializeEventListeners() {
     }
 
     // Button handlers
-    if (storyBeginBtn) {
-        storyBeginBtn.addEventListener('click', handleStoryBegin);
-    }
-    if (generateBtn) {
-        generateBtn.addEventListener('click', () => continueStory());
-    }
-    if (stopBtn) {
-        stopBtn.addEventListener('click', handleStop);
-    }
-    if (loadGameBtn) {
-        loadGameBtn.addEventListener('click', handleLoadGame);
-    }
     if (infoTrackingBtn) {
         infoTrackingBtn.addEventListener('click', toggleInfoTracking);
     }
@@ -117,19 +154,6 @@ function handleStorySoFarClick(e) {
     let closeToBottom = this.scrollHeight - this.scrollTop - this.clientHeight < 40;
     if(e.offsetY > lowerFifth && closeToBottom) {
         this.scrollTop = this.scrollHeight;
-    }
-}
-
-function handleStoryBegin() {
-    const overview = storyOverviewEl.value.trim();
-    if (overview) {
-        storyOverviewEl.style.display = 'none';
-        storyBeginBtn.style.display = 'none';
-        loadGameBtn.style.display = 'none';
-        storyGenerationAreaEl.hidden = false;
-        startGame(overview);
-    } else {
-        alert('Please enter some initial context for your adventure!');
     }
 }
 
