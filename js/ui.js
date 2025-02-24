@@ -6,6 +6,12 @@ let storySoFarEl_placeholder, storySoFarEl, storyOverviewEl, whatHappensNextEl,
 
 // UI initialization
 document.addEventListener('DOMContentLoaded', () => {
+    initializeElements();
+    initializeUI();
+    loadSavedState();
+});
+
+function initializeElements() {
     // Get DOM elements
     storySoFarEl_placeholder = document.getElementById('storySoFarEl_placeholder');
     storyOverviewEl = document.getElementById('storyOverviewEl');
@@ -23,10 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     infoTrackingBtn = document.getElementById('infoTrackingBtn');
     infoTrackingCtn = document.getElementById('infoTrackingCtn');
     currentTrackedInfoEl = document.getElementById('currentTrackedInfoEl');
-
-    initializeUI();
-    loadSavedState();
-});
+}
 
 function initializeUI() {
     const buttons = {
@@ -174,35 +177,32 @@ function toggleInfoTracking() {
 }
 
 function updateButtonsDisplay() {
-    // Use global variables instead of getting elements again
-    if (storyOverviewEl) {
-        const hasOverview = storyOverviewEl.value.trim().length > 0;
-        
-        // Show/hide begin and load buttons
-        if (storyBeginBtn) {
-            storyBeginBtn.style.display = hasOverview ? '' : 'none';
-        }
-        if (loadGameBtn) {
-            loadGameBtn.style.display = hasOverview ? '' : 'none';
-        }
-        
-        // Show/hide generation area
-        if (storyGenerationAreaEl) {
-            storyGenerationAreaEl.hidden = !hasOverview;
-        }
+    const hasOverview = storyOverviewEl?.value?.trim()?.length > 0;
+    const hasStoryText = storySoFarEl?.value?.trim()?.length > 0;
+    const hasWhatHappensNext = whatHappensNextEl?.value?.trim()?.length > 0;
+
+    // Show/hide begin and load buttons
+    if (storyBeginBtn) {
+        storyBeginBtn.style.display = hasOverview ? '' : 'none';
+    }
+    if (loadGameBtn) {
+        loadGameBtn.style.display = hasOverview ? '' : 'none';
+    }
+    
+    // Show/hide generation area
+    if (storyGenerationAreaEl) {
+        storyGenerationAreaEl.hidden = !hasOverview;
     }
 
-    // Show/hide delete button based on input
-    if (whatHappensNextEl && deleteWhatHappensNextBtn) {
-        const hasInput = whatHappensNextEl.value.trim().length > 0;
-        deleteWhatHappensNextBtn.style.display = hasInput ? '' : 'none';
+    // Show/hide delete button
+    if (deleteWhatHappensNextBtn) {
+        deleteWhatHappensNextBtn.style.display = hasWhatHappensNext ? '' : 'none';
     }
 
     // Update bottom buttons container
-    if (storySoFarEl && bottomButtonsCtn) {
-        const hasStory = storySoFarEl.value.trim().length > 0;
-        bottomButtonsCtn.style.display = hasStory ? "flex" : "none";
-        if (generateBtn) {
+    if (bottomButtonsCtn) {
+        bottomButtonsCtn.style.display = hasStoryText ? "flex" : "none";
+        if (generateBtn && hasStoryText) {
             generateBtn.textContent = "▶️ continue";
         }
     }

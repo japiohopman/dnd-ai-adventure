@@ -6,7 +6,7 @@ let isGenerating = false;
 function updateStory(text) {
     const storySoFarEl = document.getElementById('storySoFarEl');
     if (storySoFarEl) {
-        storySoFarEl.textContent += text;
+        storySoFarEl.value += text;
         storySoFarEl.scrollTop = storySoFarEl.scrollHeight;
     }
 }
@@ -14,6 +14,10 @@ function updateStory(text) {
 // Start the game with initial context
 function startGame(initialContext = '') {
     currentStory = initialContext;
+    const storySoFarEl = document.getElementById('storySoFarEl');
+    if (storySoFarEl) {
+        storySoFarEl.value = initialContext;
+    }
     const storyGenerationAreaEl = document.getElementById('storyGenerationAreaEl');
     if (storyGenerationAreaEl) {
         storyGenerationAreaEl.hidden = false;
@@ -195,9 +199,9 @@ const generationEventHandlers = {
 
 // Continue the story based on user input
 async function continueStory(opts = {}) {
-    // Get UI elements if they don't exist
     const whatHappensNextEl = document.getElementById('whatHappensNextEl');
     const deleteWhatHappensNextBtn = document.getElementById('deleteWhatHappensNextBtn');
+    const storySoFarEl = document.getElementById('storySoFarEl');
     
     // Only proceed if we have the input element
     if (!whatHappensNextEl) {
@@ -205,7 +209,7 @@ async function continueStory(opts = {}) {
         return;
     }
 
-    const userInput = whatHappensNextEl.value.trim();
+    const userInput = whatHappensNextEl.value?.trim() || '';
     
     // Clear the input and hide the delete button
     whatHappensNextEl.value = '';
@@ -218,11 +222,18 @@ async function continueStory(opts = {}) {
         return;
     }
 
+    // Get current story text
+    const storyText = storySoFarEl?.value?.trim() || '';
+
     // Generate the story continuation
-    await generateStoryContinuation({
-        ...opts,
-        userInput
-    });
+    try {
+        await generateStoryContinuation({
+            storyText,
+            userInput
+        });
+    } catch (error) {
+        console.error('Error continuing story:', error);
+    }
 }
 
 // Disable UI elements during story generation
