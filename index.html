@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <title>D&D AI - Text Adventure RPG</title>
     <meta name="description" content="Interactive AI adventure text game with unlimited free play">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=1">
 </head>
 <body>
     <div id="topStuffEl">
@@ -15,38 +16,40 @@
 
     <div id="mainCtn">
         <div id="storyOverviewPaddingEl" hidden></div>
-        <textarea id="storyOverviewEl" placeholder="(Optional) Who are you in this world, and what should the adventure be about?"></textarea>
+        <label for="storyOverviewEl">Adventure Overview</label>
+        <textarea id="storyOverviewEl" placeholder="(Optional) Who are you in this world, and what should the adventure be about?" aria-label="Adventure overview input"></textarea>
         <div id="toggleOverviewVisibilityEl" hidden>
             <button id="toggleOverviewVisibilityBtn">toggle overview</button>
         </div>
-        <button id="storyBeginBtn">🏞️ begin adventure</button>
+        <button id="storyBeginBtn" aria-label="Begin adventure">🏞️ begin adventure</button>
         
         <div id="storyBeginOptionsCtn">
             <div class="or-divider">or</div>
-            <button id="loadGameBtn">📁 load game</button>
+            <button id="loadGameBtn" aria-label="Load saved game">📁 load game</button>
         </div>
 
         <div id="storyGenerationAreaEl" hidden>
             <!-- Story area -->
             <div id="storyArea">
-                <button id="storySoFarDeleteBtn">🗑️ delete</button>
-                <div id="storySoFarEl"></div>
+                <button id="storySoFarDeleteBtn" aria-label="Delete story">🗑️ delete</button>
+                <div id="storySoFarEl" role="log" aria-live="polite" aria-label="Story progress"></div>
             </div>
 
             <!-- Action input area -->
             <div id="actionInputArea">
-                <textarea id="whatHappensNextEl" placeholder="What will you do next? Type your action here."></textarea>
-                <button id="deleteWhatHappensNextBtn" hidden>🗑️</button>
+                <label for="whatHappensNextEl">Your Next Action</label>
+                <textarea id="whatHappensNextEl" placeholder="What will you do next? Type your action here." aria-label="Enter your next action"></textarea>
+                <button id="deleteWhatHappensNextBtn" hidden aria-label="Delete current action">🗑️</button>
                 <div id="whatHappensNextSuggestionsOuterWrapper">
-                    <button id="generateWhatHappensNextIdeasBtn" title="Generate ideas about what should happen next">💡</button>
+                    <button id="generateWhatHappensNextIdeasBtn" title="Generate ideas about what should happen next" aria-label="Generate action ideas">💡</button>
                     <div id="whatHappensNextSuggestionsCtn" hidden></div>
                 </div>
             </div>
 
             <!-- Controls -->
             <div id="controlsArea">
-                <button id="generateBtn">▶️ continue</button>
-                <button id="stopBtn" hidden>🛑 stop</button>
+                <button id="generateBtn" aria-label="Continue story">▶️ continue</button>
+                <button id="stopBtn" hidden aria-label="Stop generation">🛑 stop</button>
             </div>
 
             <!-- Shortcut buttons -->
@@ -58,54 +61,68 @@
                 <div class="info-tracking-header">
                     <div class="centered-label">— current tracked info —</div>
                     <div class="tracking-controls">
-                        <button id="updateTrackedInfoUndoBtn" hidden>🔙 undo</button>
-                        <button id="updateTrackedInfoStopBtn" hidden>🛑 stop</button>
-                        <button id="updateTrackedInfoBtn">✨ generate template</button>
+                        <button id="updateTrackedInfoUndoBtn" hidden aria-label="Undo last update">🔙 undo</button>
+                        <button id="updateTrackedInfoStopBtn" hidden aria-label="Stop updating">🛑 stop</button>
+                        <button id="updateTrackedInfoBtn" aria-label="Generate info template">✨ generate template</button>
                     </div>
                 </div>
+                <label for="currentTrackedInfoEl">Adventure Information</label>
                 <textarea id="currentTrackedInfoEl" placeholder="Track important information about your adventure here" aria-label="Adventure information tracking"></textarea>
             </div>
-            <button id="infoTrackingBtn">📊 enable info tracker</button>
+            <button id="infoTrackingBtn" aria-label="Toggle info tracker">📊 enable info tracker</button>
 
             <!-- Settings area -->
             <div id="settingsAreaEl">
                 <!-- Writing style -->
                 <div class="settingsModule">
-                    <div class="module-label">— writing style —</div>
-                    <select id="responseStyleEl"></select>
+                    <label for="responseStyleEl" class="module-label">— writing style —</label>
+                    <select id="responseStyleEl" aria-label="Select writing style">
+                        <option value="default">Default</option>
+                        <option value="descriptive">Descriptive</option>
+                        <option value="concise">Concise</option>
+                    </select>
                     <div id="customResponseStyleCtn" hidden></div>
                 </div>
 
                 <!-- Difficulty mode -->
                 <div class="settingsModule">
-                    <div class="module-label">— difficulty mode —</div>
-                    <select id="difficultyModeEl"></select>
+                    <label for="difficultyModeEl" class="module-label">— difficulty mode —</label>
+                    <select id="difficultyModeEl" aria-label="Select difficulty mode">
+                        <option value="easy">Easy</option>
+                        <option value="normal">Normal</option>
+                        <option value="hard">Hard</option>
+                    </select>
                 </div>
 
                 <!-- Music settings -->
                 <div class="settingsModule">
-                    <div class="module-label">— music —</div>
-                    <select id="backgroundAudioSelectEl"></select>
-                    <input id="backgroundAudioCustomInputEl" hidden>
+                    <label for="backgroundAudioSelectEl" class="module-label">— music —</label>
+                    <select id="backgroundAudioSelectEl" aria-label="Select background music">
+                        <option value="none">None</option>
+                        <option value="fantasy">Fantasy</option>
+                        <option value="ambient">Ambient</option>
+                    </select>
+                    <label for="backgroundAudioCustomInputEl" class="visually-hidden">Custom Music URL</label>
+                    <input id="backgroundAudioCustomInputEl" hidden placeholder="Enter custom music URL" aria-label="Custom music URL">
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Load local plugins -->
-    <script src="lib/ai-plugin.js"></script>
-    <script src="lib/text-editor-plugin.js"></script>
-    <script src="lib/comments-plugin.js"></script>
-    <script src="lib/fullscreen-button-plugin.js"></script>
-    <script src="lib/upload-plugin.js"></script>
-    <script src="lib/kv-plugin.js"></script>
+    <script src="lib/ai-plugin.js?v=1"></script>
+    <script src="lib/text-editor-plugin.js?v=1"></script>
+    <script src="lib/comments-plugin.js?v=1"></script>
+    <script src="lib/fullscreen-button-plugin.js?v=1"></script>
+    <script src="lib/upload-plugin.js?v=1"></script>
+    <script src="lib/kv-plugin.js?v=1"></script>
 
     <!-- Load game scripts -->
-    <script src="js/plugins.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/story.js"></script>
-    <script src="js/shortcuts.js"></script>
-    <script src="js/infoTracking.js"></script>
-    <script src="js/settings.js"></script>
+    <script src="js/plugins.js?v=1"></script>
+    <script src="js/ui.js?v=1"></script>
+    <script src="js/story.js?v=1"></script>
+    <script src="js/shortcuts.js?v=1"></script>
+    <script src="js/infoTracking.js?v=1"></script>
+    <script src="js/settings.js?v=1"></script>
 </body>
 </html>
