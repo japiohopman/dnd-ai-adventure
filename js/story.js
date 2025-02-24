@@ -1,6 +1,8 @@
 // Story state
 let currentStory = '';
 let isGenerating = false;
+let lastLocation = '';
+let lastAction = '';
 
 // Update story display
 function updateStory(text) {
@@ -12,13 +14,17 @@ function updateStory(text) {
 }
 
 // Start the game with initial context
-function startGame(initialContext = '') {
+async function startGame(initialContext = '') {
     currentStory = initialContext;
     
     // Update story text
     const storySoFarEl = document.getElementById('storySoFarEl');
     if (storySoFarEl) {
-        storySoFarEl.value = initialContext;
+        // Generate initial location and setup
+        const enhancedContext = await window.perchancePlugin.enhanceStoryText(initialContext, {
+            isNewLocation: true
+        });
+        storySoFarEl.value = enhancedContext;
     }
 
     // Show generation area
@@ -33,42 +39,107 @@ function startGame(initialContext = '') {
     }
 }
 
-// Generate story response based on player action
-async function continueStory(action) {
-    if (isGenerating) return;
-    isGenerating = true;
-
-    try {
-        // Update UI to show we're generating
-        updateStory(`\n> ${action}\n`);
-        const generateBtn = document.getElementById('generateBtn');
-        if (generateBtn) {
-            generateBtn.textContent = '⌛ generating...';
-        }
-
-        // Generate response using AI and Perchance
-        const prompt = `${currentStory}\n\nPlayer: ${action}\n\nNarrator:`;
-        const response = await window.ai.generate(prompt);
-        const enhancedResponse = await window.perchancePlugin.enhanceStoryText(response);
-
-        // Update story with AI and Perchance response
-        currentStory += `\n${action}\n${enhancedResponse}`;
-        updateStory(enhancedResponse);
-
-        // Reset UI
-        const whatHappensNextEl = document.getElementById('whatHappensNextEl');
-        if (whatHappensNextEl) {
-            whatHappensNextEl.value = '';
-        }
-        if (generateBtn) {
-            generateBtn.textContent = '▶️ continue';
-        }
-    } catch (error) {
-        console.error('Error generating story:', error);
-        updateStory('\nError generating response. Please try again.\n');
-    } finally {
-        isGenerating = false;
+// Continue the story based on user input
+async function continueStory(opts = {}) {
+    const whatHappensNextEl = document.getElementById('whatHappensNextEl');
+    const deleteWhatHappensNextBtn = document.getElementById('deleteWhatHappensNextBtn');
+    const storySoFarEl = document.getElementById('storySoFarEl');
+    
+    // Only proceed if we have the input element
+    if (!whatHappensNextEl) {
+        console.error('Could not find whatHappensNextEl element');
+        return;
     }
+
+    const userInput = whatHappensNextEl.value?.trim() || '';
+    
+    // Clear the input and hide the delete button
+    whatHappensNextEl.value = '';
+    if (deleteWhatHappensNextBtn) {
+        deleteWhatHappensNextBtn.style.display = 'none';
+    }
+
+    // Don't continue if there's no input
+    if (!userInput) {
+        return;
+    }
+
+    // Get current story text
+    const storyText = storySoFarEl?.value?.trim() || '';
+
+    // Check for special actions
+    const isMovement = /go|move|walk|run|travel|enter|leave|climb|swim/i.test(userInput);
+    const isCombat = /attack|fight|strike|cast|shoot|throw|dodge|block|parry/i.test(userInput);
+    const isSearch = /search|look|examine|investigate|check|find|seek/i.test(userInput);
+
+    // Generate the story continuation
+    try {
+        await generateStoryContinuation({
+            storyText,
+            userInput,
+            context: {
+                isNewLocation: isMovement,
+                isEncounter: isCombat,
+                isLoot: isSearch
+            }
+        });
+    } catch (error) {
+        console.error('Error continuing story:', error);
+    }
+}
+
+// Generate story continuation using AI
+async function generateStoryContinuation(opts = {}) {
+    const {storyText, userInput, context = {}} = opts;
+    
+    // Prepare prompt
+    let prompt = "";
+    if (storyText) {
+        prompt += storyText + "\n\n";
+    }
+    if (userInput) {
+        prompt += "> " + userInput + "\n\n";
+    }
+    
+    try {
+        // First, get the AI response
+        const aiResponse = await generateWithAI(prompt);
+        
+        // Then enhance it with Perchance content
+        const enhancedResponse = await window.perchancePlugin.enhanceStoryText(aiResponse, context);
+        
+        // Update the story
+        updateStory(enhancedResponse);
+        
+        // Save the current state
+        currentStory = storySoFarEl.value;
+        
+        // Update UI
+        if (typeof window.updateButtonsDisplay === 'function') {
+            window.updateButtonsDisplay();
+        }
+        
+    } catch (error) {
+        console.error('Error in story continuation:', error);
+        updateStory('\nError generating story continuation. Please try again.\n');
+    }
+}
+
+// Generate text using AI
+async function generateWithAI(storyText, opts = {}) {
+    // Call AI generate
+    const response = await window.ai.generate(storyText, {
+        temperature: 0.7,
+        maxTokens: 1000,
+        ...opts
+    });
+    
+    // Handle generation events
+    generationEventHandlers.onStart({});
+    generationEventHandlers.onChunk({textChunk: response.text});
+    generationEventHandlers.onFinish({});
+    
+    return response;
 }
 
 // Stop story generation
@@ -205,45 +276,6 @@ const generationEventHandlers = {
     }
 };
 
-// Continue the story based on user input
-async function continueStory(opts = {}) {
-    const whatHappensNextEl = document.getElementById('whatHappensNextEl');
-    const deleteWhatHappensNextBtn = document.getElementById('deleteWhatHappensNextBtn');
-    const storySoFarEl = document.getElementById('storySoFarEl');
-    
-    // Only proceed if we have the input element
-    if (!whatHappensNextEl) {
-        console.error('Could not find whatHappensNextEl element');
-        return;
-    }
-
-    const userInput = whatHappensNextEl.value?.trim() || '';
-    
-    // Clear the input and hide the delete button
-    whatHappensNextEl.value = '';
-    if (deleteWhatHappensNextBtn) {
-        deleteWhatHappensNextBtn.style.display = 'none';
-    }
-
-    // Don't continue if there's no input
-    if (!userInput) {
-        return;
-    }
-
-    // Get current story text
-    const storyText = storySoFarEl?.value?.trim() || '';
-
-    // Generate the story continuation
-    try {
-        await generateStoryContinuation({
-            storyText,
-            userInput
-        });
-    } catch (error) {
-        console.error('Error continuing story:', error);
-    }
-}
-
 // Disable UI elements during story generation
 function disableUIForGeneration() {
     const generateBtn = document.getElementById('generateBtn');
@@ -273,47 +305,4 @@ function formatStoryText() {
             .replace(/\s+$/, "");
     }
     return '';
-}
-
-// Generate story continuation using AI
-async function generateStoryContinuation(opts) {
-    const {storyText, whatHappensNext, userInput} = opts;
-    
-    // Prepare prompt
-    let prompt = "";
-    if(storyText) {
-        prompt += storyText + "\n\n";
-    }
-    if(userInput) {
-        prompt += "> " + userInput + "\n\n";
-    }
-    
-    // Generate with AI
-    try {
-        await generateWithAI(prompt, opts);
-        const whatHappensNextEl = document.getElementById('whatHappensNextEl');
-        if (whatHappensNextEl) {
-            whatHappensNextEl.value = "";
-        }
-    } catch(error) {
-        console.error('Error in story continuation:', error);
-        throw error;
-    }
-}
-
-// Generate text using AI
-async function generateWithAI(storyText, opts = {}) {
-    // Call AI generate
-    const response = await window.ai.generate(storyText, {
-        temperature: 0.7,
-        maxTokens: 1000,
-        ...opts
-    });
-    
-    // Handle generation events
-    generationEventHandlers.onStart({});
-    generationEventHandlers.onChunk({textChunk: response.text});
-    generationEventHandlers.onFinish({});
-    
-    return response;
 }
