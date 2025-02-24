@@ -174,15 +174,7 @@ function toggleInfoTracking() {
 }
 
 function updateButtonsDisplay() {
-    // Get all required elements
-    const storyOverviewEl = document.getElementById('storyOverviewEl');
-    const storyGenerationAreaEl = document.getElementById('storyGenerationAreaEl');
-    const whatHappensNextEl = document.getElementById('whatHappensNextEl');
-    const storyBeginBtn = document.getElementById('storyBeginBtn');
-    const loadGameBtn = document.getElementById('loadGameBtn');
-    const deleteWhatHappensNextBtn = document.getElementById('deleteWhatHappensNextBtn');
-
-    // Only proceed if we have the overview element
+    // Use global variables instead of getting elements again
     if (storyOverviewEl) {
         const hasOverview = storyOverviewEl.value.trim().length > 0;
         
@@ -204,6 +196,15 @@ function updateButtonsDisplay() {
     if (whatHappensNextEl && deleteWhatHappensNextBtn) {
         const hasInput = whatHappensNextEl.value.trim().length > 0;
         deleteWhatHappensNextBtn.style.display = hasInput ? '' : 'none';
+    }
+
+    // Update bottom buttons container
+    if (storySoFarEl && bottomButtonsCtn) {
+        const hasStory = storySoFarEl.value.trim().length > 0;
+        bottomButtonsCtn.style.display = hasStory ? "flex" : "none";
+        if (generateBtn) {
+            generateBtn.textContent = "▶️ continue";
+        }
     }
 }
 

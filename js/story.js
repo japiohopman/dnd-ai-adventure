@@ -11,15 +11,6 @@ function updateStory(text) {
     }
 }
 
-// Update story display
-function updateStory(text) {
-    const storySoFarEl = document.getElementById('storySoFarEl');
-    if (storySoFarEl) {
-        storySoFarEl.textContent += text;
-        storySoFarEl.scrollTop = storySoFarEl.scrollHeight;
-    }
-}
-
 // Start the game with initial context
 function startGame(initialContext = '') {
     currentStory = initialContext;
@@ -204,26 +195,34 @@ const generationEventHandlers = {
 
 // Continue the story based on user input
 async function continueStory(opts = {}) {
-    const storySoFarEl = document.getElementById('storySoFarEl');
+    // Get UI elements if they don't exist
     const whatHappensNextEl = document.getElementById('whatHappensNextEl');
-    const storyText = storySoFarEl ? storySoFarEl.value.trim() : '';
-    const whatHappensNext = whatHappensNextEl ? whatHappensNextEl.value.trim() : '';
+    const deleteWhatHappensNextBtn = document.getElementById('deleteWhatHappensNextBtn');
     
-    if(!storyText && !whatHappensNext) {
-        alert("Please enter some text to begin the story.");
+    // Only proceed if we have the input element
+    if (!whatHappensNextEl) {
+        console.error('Could not find whatHappensNextEl element');
         return;
     }
+
+    const userInput = whatHappensNextEl.value.trim();
     
-    try {
-        await generateStoryContinuation({
-            storyText,
-            whatHappensNext,
-            ...opts
-        });
-    } catch(error) {
-        console.error('Error continuing story:', error);
-        alert('An error occurred while generating the story. Please try again.');
+    // Clear the input and hide the delete button
+    whatHappensNextEl.value = '';
+    if (deleteWhatHappensNextBtn) {
+        deleteWhatHappensNextBtn.style.display = 'none';
     }
+
+    // Don't continue if there's no input
+    if (!userInput) {
+        return;
+    }
+
+    // Generate the story continuation
+    await generateStoryContinuation({
+        ...opts,
+        userInput
+    });
 }
 
 // Disable UI elements during story generation
@@ -259,15 +258,15 @@ function formatStoryText() {
 
 // Generate story continuation using AI
 async function generateStoryContinuation(opts) {
-    const {storyText, whatHappensNext} = opts;
+    const {storyText, whatHappensNext, userInput} = opts;
     
     // Prepare prompt
     let prompt = "";
     if(storyText) {
         prompt += storyText + "\n\n";
     }
-    if(whatHappensNext) {
-        prompt += "> " + whatHappensNext + "\n\n";
+    if(userInput) {
+        prompt += "> " + userInput + "\n\n";
     }
     
     // Generate with AI
