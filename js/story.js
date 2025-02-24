@@ -18,13 +18,13 @@ async function generateStoryResponse(action) {
         updateStory(`\n> ${action}\n`);
         generateBtn.textContent = '⌛ generating...';
 
-        // Generate response using AI
+        // Generate response using AI and Perchance
         const prompt = `${currentStory}\n\nPlayer: ${action}\n\nNarrator:`;
-        const response = await window.ai.generate(prompt);
+        const enhancedResponse = await generateStoryResponse(prompt);
 
-        // Update story with AI response
-        currentStory += `\n${action}\n${response}`;
-        updateStory(response);
+        // Update story with AI and Perchance response
+        currentStory += `\n${action}\n${enhancedResponse}`;
+        updateStory(enhancedResponse);
 
         // Reset UI
         clearInputs();
@@ -34,6 +34,21 @@ async function generateStoryResponse(action) {
     } finally {
         isGenerating = false;
         generateBtn.textContent = '▶️ continue';
+    }
+}
+
+async function generateStoryResponse(prompt) {
+    try {
+        // First get the AI-generated response
+        const response = await window.ai.generate(prompt);
+        
+        // Then enhance it with Perchance-generated elements
+        const enhancedResponse = await window.perchancePlugin.enhanceStoryText(response);
+        
+        return enhancedResponse;
+    } catch (error) {
+        console.error('Error generating story response:', error);
+        return 'Error generating story. Please try again.';
     }
 }
 
