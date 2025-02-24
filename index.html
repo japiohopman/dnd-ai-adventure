@@ -3,15 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <title>D&D AI - Text Adventure RPG</title>
+    <meta name="description" content="Interactive AI adventure text game with unlimited free play">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div id="game-container">
-        <div id="story-container">
-            <div id="story-so-far"></div>
-            <div id="input-container">
-                <div id="text-editor" contenteditable="true"></div>
-                <button id="submit-btn">Submit</button>
+    <div id="topStuffEl">
+        <h1 style="margin-top:1rem; font-size:140%;">🗺️ D&D AI 🧙‍♂️</h1>
+        <p id="subtitleEl" style="font-size:85%; opacity:0.8; padding:0 0.5rem;">Add some keywords or ideas for your adventure below, then click the button to begin.</p>
+    </div>
+
+    <div id="mainCtn">
+        <div id="storyOverviewPaddingEl" hidden></div>
+        <textarea id="storyOverviewEl" placeholder="(Optional) Who are you in this world, and what should the adventure be about?"></textarea>
+        <div id="toggleOverviewVisibilityEl" hidden>
+            <button id="toggleOverviewVisibilityBtn">toggle overview</button>
+        </div>
+        <button id="storyBeginBtn">🏞️ begin adventure</button>
+        
+        <div id="storyBeginOptionsCtn">
+            <div class="or-divider">or</div>
+            <button id="loadGameBtn">📁 load game</button>
+        </div>
+
+        <div id="storyGenerationAreaEl" hidden>
+            <!-- Story area -->
+            <div id="storyArea">
+                <button id="storySoFarDeleteBtn">🗑️ delete</button>
+                <div id="storySoFarEl"></div>
+            </div>
+
+            <!-- Action input area -->
+            <div id="actionInputArea">
+                <textarea id="whatHappensNextEl" placeholder="What will you do next? Type your action here."></textarea>
+                <button id="deleteWhatHappensNextBtn" hidden>🗑️</button>
+                <div id="whatHappensNextSuggestionsOuterWrapper">
+                    <button id="generateWhatHappensNextIdeasBtn" title="Generate ideas about what should happen next">💡</button>
+                    <div id="whatHappensNextSuggestionsCtn" hidden></div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div id="controlsArea">
+                <button id="generateBtn">▶️ continue</button>
+                <button id="stopBtn" hidden>🛑 stop</button>
+            </div>
+
+            <!-- Shortcut buttons -->
+            <div id="dragShortcutButtonsToReorderHintEl" hidden></div>
+            <div id="shortcutButtonsCtn" hidden></div>
+
+            <!-- Info tracking -->
+            <div id="infoTrackingCtn" hidden>
+                <div class="info-tracking-header">
+                    <div class="centered-label">— current tracked info —</div>
+                    <div class="tracking-controls">
+                        <button id="updateTrackedInfoUndoBtn" hidden>🔙 undo</button>
+                        <button id="updateTrackedInfoStopBtn" hidden>🛑 stop</button>
+                        <button id="updateTrackedInfoBtn">✨ generate template</button>
+                    </div>
+                </div>
+                <textarea id="currentTrackedInfoEl"></textarea>
+            </div>
+            <button id="infoTrackingBtn">📊 enable info tracker</button>
+
+            <!-- Settings area -->
+            <div id="settingsAreaEl">
+                <!-- Writing style -->
+                <div class="settingsModule">
+                    <div class="module-label">— writing style —</div>
+                    <select id="responseStyleEl"></select>
+                    <div id="customResponseStyleCtn" hidden></div>
+                </div>
+
+                <!-- Difficulty mode -->
+                <div class="settingsModule">
+                    <div class="module-label">— difficulty mode —</div>
+                    <select id="difficultyModeEl"></select>
+                </div>
+
+                <!-- Music settings -->
+                <div class="settingsModule">
+                    <div class="module-label">— music —</div>
+                    <select id="backgroundAudioSelectEl"></select>
+                    <input id="backgroundAudioCustomInputEl" hidden>
+                </div>
             </div>
         </div>
     </div>
@@ -31,20 +106,5 @@
     <script src="js/shortcuts.js"></script>
     <script src="js/infoTracking.js"></script>
     <script src="js/settings.js"></script>
-
-    <script>
-        // Initialize game when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize UI elements
-            initializeUI();
-            
-            // Set up event listeners
-            document.getElementById('submit-btn').addEventListener('click', handleSubmit);
-            document.getElementById('text-editor').addEventListener('keydown', handleKeyDown);
-            
-            // Start the game
-            startGame();
-        });
-    </script>
 </body>
 </html>

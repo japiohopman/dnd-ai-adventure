@@ -1,7 +1,8 @@
 // Get DOM elements
 let storySoFarEl_placeholder, storySoFarEl, storyOverviewEl, whatHappensNextEl,
     deleteWhatHappensNextBtn, storyBeginBtn, generateBtn, stopBtn, storySoFarDeleteBtn,
-    updateTrackedInfoUndoBtn, bottomButtonsCtn, subtitleEl;
+    updateTrackedInfoUndoBtn, bottomButtonsCtn, subtitleEl, loadGameBtn, storyGenerationAreaEl,
+    infoTrackingBtn, infoTrackingCtn, currentTrackedInfoEl;
 
 // UI initialization
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,6 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTrackedInfoUndoBtn = document.getElementById('updateTrackedInfoUndoBtn');
     bottomButtonsCtn = document.getElementById('bottomButtonsCtn');
     subtitleEl = document.getElementById('subtitleEl');
+    loadGameBtn = document.getElementById('loadGameBtn');
+    storyGenerationAreaEl = document.getElementById('storyGenerationAreaEl');
+    infoTrackingBtn = document.getElementById('infoTrackingBtn');
+    infoTrackingCtn = document.getElementById('infoTrackingCtn');
+    currentTrackedInfoEl = document.getElementById('currentTrackedInfoEl');
 
     initializeUI();
     loadSavedState();
@@ -83,6 +89,12 @@ function initializeEventListeners() {
     if (stopBtn) {
         stopBtn.addEventListener('click', handleStop);
     }
+    if (loadGameBtn) {
+        loadGameBtn.addEventListener('click', handleLoadGame);
+    }
+    if (infoTrackingBtn) {
+        infoTrackingBtn.addEventListener('click', toggleInfoTracking);
+    }
 }
 
 function handleStorySoFarInput() {
@@ -109,16 +121,32 @@ function handleStorySoFarClick(e) {
 }
 
 function handleStoryBegin() {
-    this.disabled = true;
-    storyBeginOptionsCtn.hidden = true;
-    this.textContent = '⌛ loading...';
-    generateBtn.click();
+    const overview = storyOverviewEl.value.trim();
+    if (overview) {
+        storyOverviewEl.style.display = 'none';
+        storyBeginBtn.style.display = 'none';
+        loadGameBtn.style.display = 'none';
+        storyGenerationAreaEl.hidden = false;
+        startGame(overview);
+    } else {
+        alert('Please enter some initial context for your adventure!');
+    }
+}
+
+function handleLoadGame() {
+    // Implement game loading functionality
+    console.log('Load game clicked');
 }
 
 function handleStop() {
     window.userClickedStop = true;
     window.lastGenerationStreamObj.stop();
     this.style.display = 'none';
+}
+
+function toggleInfoTracking() {
+    infoTrackingCtn.hidden = !infoTrackingCtn.hidden;
+    infoTrackingBtn.textContent = infoTrackingCtn.hidden ? '📊 enable info tracker' : '📊 disable info tracker';
 }
 
 function updateButtonsDisplay() {

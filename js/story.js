@@ -1,3 +1,71 @@
+// Story state
+let currentStory = '';
+let isGenerating = false;
+
+// Start the game with initial context
+function startGame(initialContext = '') {
+    currentStory = initialContext;
+    updateStory('Welcome to your D&D adventure! ' + initialContext);
+}
+
+// Generate story response based on player action
+async function generateStoryResponse(action) {
+    if (isGenerating) return;
+    isGenerating = true;
+
+    try {
+        // Update UI to show we're generating
+        updateStory(`\n> ${action}\n`);
+        generateBtn.textContent = '⌛ generating...';
+
+        // Generate response using AI
+        const prompt = `${currentStory}\n\nPlayer: ${action}\n\nNarrator:`;
+        const response = await window.ai.generate(prompt);
+
+        // Update story with AI response
+        currentStory += `\n${action}\n${response}`;
+        updateStory(response);
+
+        // Reset UI
+        clearInputs();
+    } catch (error) {
+        console.error('Error generating story:', error);
+        updateStory('\nError generating response. Please try again.\n');
+    } finally {
+        isGenerating = false;
+        generateBtn.textContent = '▶️ continue';
+    }
+}
+
+// Stop story generation
+function stopGeneration() {
+    if (window.ai && typeof window.ai.stop === 'function') {
+        window.ai.stop();
+    }
+    isGenerating = false;
+}
+
+// Save game state
+function saveGame() {
+    const gameState = {
+        story: currentStory,
+        timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('dndGameState', JSON.stringify(gameState));
+}
+
+// Load game state
+function loadGame() {
+    const savedState = localStorage.getItem('dndGameState');
+    if (savedState) {
+        const gameState = JSON.parse(savedState);
+        currentStory = gameState.story;
+        updateStory(currentStory);
+        return true;
+    }
+    return false;
+}
+
 // Story generation event handlers
 const generationEventHandlers = {
     onStart(data) {
