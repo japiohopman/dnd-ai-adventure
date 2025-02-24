@@ -14,15 +14,23 @@ function updateStory(text) {
 // Start the game with initial context
 function startGame(initialContext = '') {
     currentStory = initialContext;
+    
+    // Update story text
     const storySoFarEl = document.getElementById('storySoFarEl');
     if (storySoFarEl) {
         storySoFarEl.value = initialContext;
     }
+
+    // Show generation area
     const storyGenerationAreaEl = document.getElementById('storyGenerationAreaEl');
     if (storyGenerationAreaEl) {
         storyGenerationAreaEl.hidden = false;
     }
-    updateStory('Welcome to your D&D adventure! ' + initialContext);
+
+    // Update button states
+    if (typeof window.updateButtonsDisplay === 'function') {
+        window.updateButtonsDisplay();
+    }
 }
 
 // Generate story response based on player action

@@ -29,111 +29,148 @@ function initializeElements() {
     infoTrackingBtn = document.getElementById('infoTrackingBtn');
     infoTrackingCtn = document.getElementById('infoTrackingCtn');
     currentTrackedInfoEl = document.getElementById('currentTrackedInfoEl');
+
+    // Log any missing elements
+    const elements = {
+        storySoFarEl_placeholder, storyOverviewEl, whatHappensNextEl,
+        deleteWhatHappensNextBtn, storyBeginBtn, generateBtn, stopBtn,
+        storySoFarDeleteBtn, updateTrackedInfoUndoBtn, bottomButtonsCtn,
+        subtitleEl, loadGameBtn, storyGenerationAreaEl, infoTrackingBtn,
+        infoTrackingCtn, currentTrackedInfoEl
+    };
+
+    Object.entries(elements).forEach(([name, element]) => {
+        if (!element) {
+            console.warn(`Missing element: ${name}`);
+        }
+    });
 }
 
 function initializeUI() {
-    const buttons = {
-        storyBeginBtn: document.getElementById('storyBeginBtn'),
-        loadGameBtn: document.getElementById('loadGameBtn'),
-        generateBtn: document.getElementById('generateBtn'),
-        stopBtn: document.getElementById('stopBtn')
-    };
-
-    const inputs = {
-        whatHappensNextEl: document.getElementById('whatHappensNextEl'),
-        storyOverviewEl: document.getElementById('storyOverviewEl')
-    };
-
     // Initialize story text area
-    if (!window.storySoFarEl) {
+    const storySoFarElement = document.getElementById('storySoFarEl');
+    if (storySoFarElement && !window.storySoFarEl) {
         window.storySoFarEl = createTextEditor({
             textStyleRules: [
                 {match: /(\s|^)\*\*[^*"""]+?\*\*/g, style: "font-weight:bold;"},
                 {match: /(\s|^)\*[^*"""]+?\*/g, style: "color:var(--text-style-rule-asterisk-color); font-style:italic;"},
-                {match: /(^|\n)>[^\n]*/g, style: "color:var(--text-style-rule-block-quote-color); font-style:italic;"},
-                {match: /(\s|^)[""][^*"]+?[""]/g, style: "color:var(--text-style-rule-quote-color); font-style:italic;"},
-                {match: /^[^:]{1,30}?:/g, style: "font-weight:bold;"},
-                {match: /(^|\n)#+ [^\n]*/g, style: "font-weight:bold;"},
+                {match: /(^|\n)>[^\n]*/g, style: "color:var(--text-style-rule-block-quote-color);"}
             ],
+            placeholder: 'The story will appear here when you click the generate button below. You can edit it as needed.',
+            onInput: handleStorySoFarInput,
+            onClick: handleStorySoFarClick
         });
-    }
-    storySoFarEl = window.storySoFarEl;
 
-    if (storySoFarEl_placeholder) {
-        storySoFarEl_placeholder.replaceWith(storySoFarEl);
-        storySoFarEl.style.cssText = `display:block; padding-bottom:1.5rem; width:100%; max-width:98vw; min-height:400px; max-height:80vh; height:${window.innerHeight*0.3}px;`;
-        storySoFarEl.placeholder = 'The story will appear here when you click the generate button below. You can edit it as needed.';
-    }
-
-    // Add event listeners
-    if (buttons.storyBeginBtn) {
-        buttons.storyBeginBtn.addEventListener('click', () => {
-            const overview = inputs.storyOverviewEl ? inputs.storyOverviewEl.value.trim() : '';
-            startGame(overview);
-        });
-    }
-
-    if (buttons.loadGameBtn) {
-        buttons.loadGameBtn.addEventListener('click', loadGame);
-    }
-
-    if (buttons.generateBtn) {
-        buttons.generateBtn.addEventListener('click', () => {
-            const action = inputs.whatHappensNextEl ? inputs.whatHappensNextEl.value.trim() : '';
-            if (action) {
-                continueStory(action);
-            }
-        });
-    }
-
-    if (buttons.stopBtn) {
-        buttons.stopBtn.addEventListener('click', stopGeneration);
-    }
-
-    if (inputs.whatHappensNextEl) {
-        inputs.whatHappensNextEl.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                const action = inputs.whatHappensNextEl.value.trim();
-                if (action) {
-                    continueStory(action);
-                }
-            }
-        });
+        // Replace the original element with the text editor
+        storySoFarElement.replaceWith(window.storySoFarEl);
+        window.storySoFarEl.style.cssText = `
+            display: block;
+            padding-bottom: 1.5rem;
+            width: 100%;
+            max-width: 98vw;
+            min-height: 400px;
+            max-height: 80vh;
+            height: ${window.innerHeight * 0.3}px;
+        `;
+        
+        // Update the global reference
+        storySoFarEl = window.storySoFarEl;
     }
 
     // Initialize event listeners
     initializeEventListeners();
+
+    // Update initial button states
     updateButtonsDisplay();
 }
 
 function initializeEventListeners() {
-    // Story overview
+    // Story overview input
     if (storyOverviewEl) {
-        storyOverviewEl.addEventListener('input', () => {
-            localStorage.storyOverview = storyOverviewEl.value;
-        });
-    }
-
-    // Story text area
-    if (storySoFarEl) {
-        storySoFarEl.addEventListener('input', handleStorySoFarInput);
-        storySoFarEl.addEventListener('click', handleStorySoFarClick);
+        storyOverviewEl.addEventListener('input', updateButtonsDisplay);
     }
 
     // What happens next input
     if (whatHappensNextEl) {
         whatHappensNextEl.addEventListener('input', () => {
-            localStorage.whatHappensNext = whatHappensNextEl.value;
             if (deleteWhatHappensNextBtn) {
-                deleteWhatHappensNextBtn.hidden = !whatHappensNextEl.value.trim();
+                deleteWhatHappensNextBtn.style.display = whatHappensNextEl.value.trim() ? '' : 'none';
             }
         });
     }
 
-    // Button handlers
+    // Story begin button
+    if (storyBeginBtn) {
+        storyBeginBtn.addEventListener('click', () => {
+            if (storyOverviewEl) {
+                window.startGame(storyOverviewEl.value);
+            }
+        });
+    }
+
+    // Load game button
+    if (loadGameBtn) {
+        loadGameBtn.addEventListener('click', handleLoadGame);
+    }
+
+    // Generate button
+    if (generateBtn) {
+        generateBtn.addEventListener('click', () => {
+            window.continueStory();
+        });
+    }
+
+    // Stop button
+    if (stopBtn) {
+        stopBtn.addEventListener('click', handleStop);
+    }
+
+    // Delete what happens next button
+    if (deleteWhatHappensNextBtn) {
+        deleteWhatHappensNextBtn.addEventListener('click', () => {
+            if (whatHappensNextEl) {
+                whatHappensNextEl.value = '';
+                deleteWhatHappensNextBtn.style.display = 'none';
+            }
+        });
+    }
+
+    // Info tracking button
     if (infoTrackingBtn) {
         infoTrackingBtn.addEventListener('click', toggleInfoTracking);
+    }
+}
+
+// Update buttons display based on state
+function updateButtonsDisplay() {
+    const hasOverview = storyOverviewEl?.value?.trim()?.length > 0;
+    const hasStoryText = storySoFarEl?.value?.trim()?.length > 0;
+    const hasWhatHappensNext = whatHappensNextEl?.value?.trim()?.length > 0;
+
+    // Show/hide begin and load buttons
+    if (storyBeginBtn) {
+        storyBeginBtn.style.display = hasOverview ? '' : 'none';
+    }
+    if (loadGameBtn) {
+        loadGameBtn.style.display = hasOverview ? '' : 'none';
+    }
+    
+    // Show/hide generation area
+    if (storyGenerationAreaEl) {
+        storyGenerationAreaEl.hidden = !hasOverview;
+    }
+
+    // Show/hide delete button
+    if (deleteWhatHappensNextBtn) {
+        deleteWhatHappensNextBtn.style.display = hasWhatHappensNext ? '' : 'none';
+    }
+
+    // Update bottom buttons container
+    if (bottomButtonsCtn) {
+        bottomButtonsCtn.style.display = hasStoryText ? "flex" : "none";
+        if (generateBtn && hasStoryText) {
+            generateBtn.textContent = "▶️ continue";
+        }
     }
 }
 
@@ -174,38 +211,6 @@ function handleStop() {
 function toggleInfoTracking() {
     infoTrackingCtn.hidden = !infoTrackingCtn.hidden;
     infoTrackingBtn.textContent = infoTrackingCtn.hidden ? '📊 enable info tracker' : '📊 disable info tracker';
-}
-
-function updateButtonsDisplay() {
-    const hasOverview = storyOverviewEl?.value?.trim()?.length > 0;
-    const hasStoryText = storySoFarEl?.value?.trim()?.length > 0;
-    const hasWhatHappensNext = whatHappensNextEl?.value?.trim()?.length > 0;
-
-    // Show/hide begin and load buttons
-    if (storyBeginBtn) {
-        storyBeginBtn.style.display = hasOverview ? '' : 'none';
-    }
-    if (loadGameBtn) {
-        loadGameBtn.style.display = hasOverview ? '' : 'none';
-    }
-    
-    // Show/hide generation area
-    if (storyGenerationAreaEl) {
-        storyGenerationAreaEl.hidden = !hasOverview;
-    }
-
-    // Show/hide delete button
-    if (deleteWhatHappensNextBtn) {
-        deleteWhatHappensNextBtn.style.display = hasWhatHappensNext ? '' : 'none';
-    }
-
-    // Update bottom buttons container
-    if (bottomButtonsCtn) {
-        bottomButtonsCtn.style.display = hasStoryText ? "flex" : "none";
-        if (generateBtn && hasStoryText) {
-            generateBtn.textContent = "▶️ continue";
-        }
-    }
 }
 
 function loadSavedState() {
