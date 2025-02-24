@@ -1,0 +1,13 @@
+@echo off
+echo Starting server...
+python -m http.server 8000
+if errorlevel 1 (
+    echo Python not found, trying python3...
+    python3 -m http.server 8000
+    if errorlevel 1 (
+        echo Installing Python...
+        powershell -Command "Start-Process -Wait -FilePath 'powershell' -ArgumentList '-Command', 'winget install -e --id Python.Python.3.12'"
+        echo Retrying server start...
+        python -m http.server 8000
+    )
+)

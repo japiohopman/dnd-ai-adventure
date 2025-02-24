@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>D&D AI - Text Adventure RPG</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="story-container">
+            <div id="story-so-far"></div>
+            <div id="input-container">
+                <div id="text-editor" contenteditable="true"></div>
+                <button id="submit-btn">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load local plugins -->
+    <script src="lib/ai-plugin.js"></script>
+    <script src="lib/text-editor-plugin.js"></script>
+    <script src="lib/comments-plugin.js"></script>
+    <script src="lib/fullscreen-button-plugin.js"></script>
+    <script src="lib/upload-plugin.js"></script>
+    <script src="lib/kv-plugin.js"></script>
+
+    <!-- Load game scripts -->
+    <script src="js/plugins.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/story.js"></script>
+    <script src="js/shortcuts.js"></script>
+    <script src="js/infoTracking.js"></script>
+    <script src="js/settings.js"></script>
+
+    <script>
+        // Initialize game when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize UI elements
+            initializeUI();
+            
+            // Set up event listeners
+            document.getElementById('submit-btn').addEventListener('click', handleSubmit);
+            document.getElementById('text-editor').addEventListener('keydown', handleKeyDown);
+            
+            // Start the game
+            startGame();
+        });
+    </script>
+</body>
+</html>
