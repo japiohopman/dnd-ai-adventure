@@ -1,0 +1,10 @@
+# Security Headers
+Header set X-Content-Type-Options "nosniff"
+Header set Cache-Control "max-age=180"
+Header unset Expires
+
+# CORS Headers
+Header set Access-Control-Allow-Origin "*"
+
+# Content Security Policy
+Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
